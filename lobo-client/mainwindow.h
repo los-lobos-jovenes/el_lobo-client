@@ -17,10 +17,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     QString str = "";
+    QString username = "";
+    QString password = "";
 
 private slots:
      void on_pushButton_clicked();
      void on_pushButton_2_clicked();
+     void on_pushButton_3_clicked();
      void on_pushButton_5_clicked();
      void readData();
      void displayError(QAbstractSocket::SocketError socketError);
