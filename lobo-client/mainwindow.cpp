@@ -29,6 +29,22 @@ void MainWindow::on_pushButton_clicked(){
     ui->lineEdit_2->clear();
 }
 
+void MainWindow::on_pushButton_2_clicked(){
+
+
+    QString address = ui->lineEdit->text();
+    QString port = ui->lineEdit_5->text();
+    tcpSocket->connectToHost(address, port.toInt());
+}
+
+void MainWindow::on_pushButton_5_clicked(){
+
+
+    ui->lineEdit->clear();
+    ui->lineEdit_5->clear();
+    tcpSocket->disconnectFromHost();
+}
+
 void MainWindow::readData(){
     //odbieranie danych
     char buf[BUF_SIZE];
