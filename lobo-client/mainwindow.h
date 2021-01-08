@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QtDebug>
 #include <QtNetwork>
+#include <string>
+#include "msg.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,9 +18,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    QString str = "";
-    QString username = "";
-    QString password = "";
+    std::string str = "";
+    std::string username = "";
+    std::string password = "";
+    msg received_msg;
 
 private slots:
      void on_pushButton_clicked();
