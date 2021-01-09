@@ -5,6 +5,8 @@
 #include <QtDebug>
 #include <QtNetwork>
 #include <string>
+#include <vector>
+//#include <QMutex>
 #include "msg.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -18,15 +20,18 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    std::string str = "";
+    std::string displayed_text = "";
     std::string username = "";
     std::string password = "";
-    msg received_msg;
+    std::string target_user = "";
+    //std::vector<msg> received;
+    //QMutex mutex;
 
 private slots:
      void on_pushButton_clicked();
      void on_pushButton_2_clicked();
      void on_pushButton_3_clicked();
+     void on_pushButton_4_clicked();
      void on_pushButton_5_clicked();
      void readData();
      void displayError(QAbstractSocket::SocketError socketError);

@@ -672,6 +672,19 @@
       <string>User to which you want to type</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checkBox_2">
+     <property name="geometry">
+      <rect>
+       <x>420</x>
+       <y>40</y>
+       <width>151</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load all messages</string>
+     </property>
+    </widget>
    </widget>
    <zorder>frame_3</zorder>
    <zorder>frame_2</zorder>

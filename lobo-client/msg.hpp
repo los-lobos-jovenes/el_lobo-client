@@ -1,6 +1,3 @@
-#ifndef _MSG_HPP
-#define _MSG_HPP
-
 #include <string>
 #include <vector>
 #include <sstream>
@@ -75,7 +72,3 @@ public:
         }
 
 };
-
-#undef MSG_SEPARATOR
-
-#endif
