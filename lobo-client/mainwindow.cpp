@@ -56,21 +56,13 @@ void MainWindow::on_pushButton_clicked(){
     strcpy(write_buf, message.concat().c_str());
 
     QString debug;
-    for(int i=0; i<10; i++){
+    for(unsigned int i=0; i<message.parts.size(); i++){
         debug += QString::fromStdString(message[i]);
     }
     qDebug() << "[DEBUG]: Sending message: " << debug;
     tcpSocket->write(write_buf, sizeof(write_buf));
 
     //READ
-    /*
-    if(received.size() == 1 && received[0][3].compare("SUCCESS")){
-        qDebug() << "[DEBUG]: Successfully sent message: " << QString::fromStdString(str);
-    }
-    else{
-        qDebug() << "[DEBUG]: Error while sending message: " << QString::fromStdString(str);
-    }
-    */
 }
 
 //connect to host
@@ -78,11 +70,15 @@ void MainWindow::on_pushButton_2_clicked(){
     QString address = ui->lineEdit->text();
     QString port = ui->lineEdit_5->text();
     tcpSocket->connectToHost(address, port.toInt());
+    displayed_text.append("@SUCCESS: CONNECTED\n");
+    ui->textBrowser->setText(QString::fromStdString(displayed_text));
     qDebug() << "[DEBUG]: Connected to host; IP: " << address << " ; port: " << port;
 }
 
 //change or create user
 void MainWindow::on_pushButton_3_clicked(){
+    displayed_text.clear();
+    ui->textBrowser->clear();
     username = ui->lineEdit_3->text().toStdString();
     password = ui->lineEdit_6->text().toStdString();
 
@@ -94,28 +90,22 @@ void MainWindow::on_pushButton_3_clicked(){
         strcpy(write_buf, user_creation.concat().c_str());
 
         QString debug;
-        for(int i=0; i<10; i++){
+        for(unsigned int i=0; i<user_creation.parts.size(); i++){
             debug += QString::fromStdString(user_creation[i]);
         }
         qDebug() << "[DEBUG]: Sending creation request: " << debug;
         tcpSocket->write(write_buf, sizeof(write_buf));
 
         //READ
-        /*
-        if(received.size() == 1 && received[0][3].compare("SUCCESS")){
-            qDebug() << "[DEBUG]: Successfully created user: " << QString::fromStdString(username);
-        }
-        else{
-            qDebug() << "[DEBUG]: Error while creating user: " << QString::fromStdString(username);
-        }
-        */
     }
     else{
+        //displayed_text.append("@SUCCESS\n");
+        //ui->textBrowser->setText(QString::fromStdString(displayed_text));
         qDebug() << "[DEBUG]: Changed user to: " << QString::fromStdString(username);
     }
 }
 
-//change conversation (and PULL ALL MESSAGES)
+//change conversation (and optionally PULL ALL MESSAGES)
 void MainWindow::on_pushButton_4_clicked(){
     displayed_text.clear();
     ui->textBrowser->clear();
@@ -129,37 +119,29 @@ void MainWindow::on_pushButton_4_clicked(){
         char write_buf[BUF_SIZE];
         strcpy(write_buf, puller.concat().c_str());
         QString debug;
-        for(int i=0; i<10; i++){
+        for(unsigned int i=0; i<puller.parts.size(); i++){
             debug += QString::fromStdString(puller[i]);
         }
         qDebug() << "[DEBUG]: Sending all-pull request: " << debug;
         tcpSocket->write(write_buf, sizeof(write_buf));
 
         //READ
-        /*
-        //simple displaying messages WITHOUT SORTING FOR NOW
-        for(unsigned int i=0; i < received.size()-1; i++){
-            displayed_text.append("@");
-            displayed_text.append(received[i][3]);
-            displayed_text.append(": ");
-            displayed_text.append(received[i][4]);
-            displayed_text.append("\n");
-        }
-        ui->textBrowser->setText(QString::fromStdString(displayed_text));
-        qDebug() << "[DEBUG]: Messages displayed";
-        */
     }
 }
 
 //disconnect from host
 void MainWindow::on_pushButton_5_clicked(){
+    displayed_text.clear();
+    ui->textBrowser->clear();
     ui->lineEdit->clear();
     ui->lineEdit_5->clear();
     tcpSocket->disconnectFromHost();
+    displayed_text.append("@SUCCESS: DISCONNECTED\n");
+    ui->textBrowser->setText(QString::fromStdString(displayed_text));
     qDebug() << "[DEBUG]: Disconnected from host.";
 }
 
-//odbieranie danych
+//read data on readyRead()
 void MainWindow::readData(){
     msg received;
     char buf[BUF_SIZE];
@@ -168,44 +150,45 @@ void MainWindow::readData(){
     std::string tmp_str(buf);
     received.decode(tmp_str);
     QString debug;
-    for(int i=0; i<10; i++){
+    for(unsigned int i=0; i<received.parts.size(); i++){
         debug += QString::fromStdString(received[i]);
     }
     qDebug() << "[DEBUG]: Received: " << debug;
-    //simple displaying messages WITHOUT SORTING FOR NOW
-    if(std::stoi(received.extract(3)) == 2){
-        displayed_text.append("@");
-        displayed_text.append(received[4]);
-        displayed_text.append(": ");
-        displayed_text.append(received[5]);
-        displayed_text.append("\n");
-        ui->textBrowser->setText(QString::fromStdString(displayed_text));
-        qDebug() << "[DEBUG]: Error displayed";
-    }
-    else if(std::stoi(received.extract(3)) == 3){
-        //received[4] == TIMESTAMP
-        displayed_text.append("@");
-        displayed_text.append(received[5]);
-        displayed_text.append(": ");
-        displayed_text.append(received[6]);
-        displayed_text.append("\n");
-        ui->textBrowser->setText(QString::fromStdString(displayed_text));
-        qDebug() << "[DEBUG]: Message displayed";
-    }
 
-    /*
-    do{
-        char buf[BUF_SIZE];
-        int n = tcpSocket->readLine(buf, BUF_SIZE);
-        buf[n] = 0;
-        std::string tmp_str(buf);
-        msg tmp_msg;
-        tmp_msg.decode(tmp_str);
-        received.push_back(tmp_msg);
-        qDebug() << "[DEBUG]: Received: " << QString::fromStdString(tmp_msg.concat());
-    }while(received.back()[3] != "ENDT" && received.back()[3] != "SUCCESS" && received.back()[3] != "ERROR");
-    */
-    //zawiesza się gdy brak wiadomości?
+    for(unsigned int i=0; i<received.parts.size(); i++){
+        if(received.extract(i).compare("RETN") == 0){
+            /* succes action
+            if(received.extract(i+1).compare("1") == 0 && received.extract(i+2).compare("SUCCESS") == 0){
+                displayed_text.append("@SUCCESS\n");
+                ui->textBrowser->setText(QString::fromStdString(displayed_text));
+                qDebug() << "[DEBUG]: Success displayed";
+                i += 3;
+            } else
+            */
+            if(received.extract(i+1).compare("2") == 0){
+                displayed_text.append("@");
+                displayed_text.append(received.extract(i+2));
+                displayed_text.append(": ");
+                displayed_text.append(received.extract(i+3));
+                displayed_text.append("\n");
+                ui->textBrowser->setText(QString::fromStdString(displayed_text));
+                qDebug() << "[DEBUG]: Error displayed";
+                i += 3;
+            }
+            else if(received.extract(i+1).compare("3") == 0){
+                //simple displaying messages WITHOUT SORTING FOR NOW
+                //received[4] == TIMESTAMP
+                displayed_text.append("@");
+                displayed_text.append(received.extract(i+3));
+                displayed_text.append(": ");
+                displayed_text.append(received.extract(i+4));
+                displayed_text.append("\n");
+                ui->textBrowser->setText(QString::fromStdString(displayed_text));
+                qDebug() << "[DEBUG]: Message displayed";
+                i += 4;
+            }
+        }
+    }
 }
 
 void MainWindow::displayError(QAbstractSocket::SocketError socketError){

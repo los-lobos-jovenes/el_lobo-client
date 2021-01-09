@@ -9,11 +9,10 @@
 
 class msg
 {
-
-        std::vector<std::string> parts;
         static constexpr char separator = MSG_SEPARATOR;
 
 public:
+        std::vector<std::string> parts;
         msg() = default;
 
         template <typename T>
