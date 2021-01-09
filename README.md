@@ -6,9 +6,17 @@ Klient czatu el-lobo
 
 ## Kompilacja
 
-> Qt
+> Qt Creator
 
 ## Uruchomienie
 
-> Qt
+> Qt Creator
 
+## Zaimplementowane funckje:
+* Łączenie i rozłączanie z serwerem.
+* Tworzenie i zmiana użytkownika (CREA).
+* Wchodzenie w konwersację z podanym użytkownikiem.
+* Wysyłanie wiadomości (SEND).
+* Pobieranie wszystkich wiadomości z serwera (APLL) + ich sortowanie wg timestamp-u i wyświetlanie.
+* Oczekiwanie na wiadomości z serwera przez readyRead() (RETN, ENDT).
+* Informowanie użytkownika o większości błędów.
