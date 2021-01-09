@@ -1,31 +1,12 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-#define BUF_SIZE 256
+#define WRITE_BUF_SIZE 128
+#define READ_BUF_SIZE 4096
 
-/*
-//concatanated string of msg into a vector of msg
-std::vector<msg> breakdown(std::string str){
-    std::vector<msg> res;
-    unsigned int start = 0;
-    unsigned int stop = 0;
-    for(unsigned int i=0; i<str.size(); i++){
-        if(str[i] == MSG_SEPARATOR && str[i-1] == MSG_SEPARATOR){
-            stop = i-1;
-            msg tmp;
-            tmp.decode(str.substr(start, stop-start));
-            res.push_back(tmp);
-            start = i;
-        }
-    }
-    stop = str.size()-1;
-    msg tmp;
-    tmp.decode(str.substr(start, stop-start));
-    res.push_back(tmp);
-
-    return res;
+bool timeSort(std::vector<std::string> v1, std::vector<std::string> v2){
+    return v1[0] < v2[0];
 }
-*/
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -52,7 +33,7 @@ void MainWindow::on_pushButton_clicked(){
     //send SEND to server
     msg message;
     message.form("1", "SEND", "4", username, password, target_user, str);
-    char write_buf[BUF_SIZE];
+    char write_buf[WRITE_BUF_SIZE];
     strcpy(write_buf, message.concat().c_str());
 
     QString debug;
@@ -62,6 +43,13 @@ void MainWindow::on_pushButton_clicked(){
     qDebug() << "[DEBUG]: Sending message: " << debug;
     tcpSocket->write(write_buf, sizeof(write_buf));
 
+    //immidiately display sent message
+    displayed_text.append("@");
+    displayed_text.append(username);
+    displayed_text.append(": ");
+    displayed_text.append(str);
+    displayed_text.append("\n");
+    ui->textBrowser->setText(QString::fromStdString(displayed_text));
     //READ
 }
 
@@ -77,6 +65,7 @@ void MainWindow::on_pushButton_2_clicked(){
 
 //change or create user
 void MainWindow::on_pushButton_3_clicked(){
+    message_list.clear();
     displayed_text.clear();
     ui->textBrowser->clear();
     username = ui->lineEdit_3->text().toStdString();
@@ -86,7 +75,7 @@ void MainWindow::on_pushButton_3_clicked(){
         //send CREA to server
         msg user_creation;
         user_creation.form("1", "CREA", "2", username, password);
-        char write_buf[BUF_SIZE];
+        char write_buf[WRITE_BUF_SIZE];
         strcpy(write_buf, user_creation.concat().c_str());
 
         QString debug;
@@ -105,32 +94,18 @@ void MainWindow::on_pushButton_3_clicked(){
     }
 }
 
-//change conversation (and optionally PULL ALL MESSAGES)
+//change conversation
 void MainWindow::on_pushButton_4_clicked(){
+    message_list.clear();
     displayed_text.clear();
     ui->textBrowser->clear();
     target_user = ui->lineEdit_4->text().toStdString();
     qDebug() << "[DEBUG]: Conversation changed to: " << QString::fromStdString(target_user);
-
-    if(ui->checkBox_2->checkState()){
-        //send APLL to server
-        msg puller;
-        puller.form("2", "APLL", "3", username, password, target_user);
-        char write_buf[BUF_SIZE];
-        strcpy(write_buf, puller.concat().c_str());
-        QString debug;
-        for(unsigned int i=0; i<puller.parts.size(); i++){
-            debug += QString::fromStdString(puller[i]);
-        }
-        qDebug() << "[DEBUG]: Sending all-pull request: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
-
-        //READ
-    }
 }
 
 //disconnect from host
 void MainWindow::on_pushButton_5_clicked(){
+    message_list.clear();
     displayed_text.clear();
     ui->textBrowser->clear();
     ui->lineEdit->clear();
@@ -141,11 +116,37 @@ void MainWindow::on_pushButton_5_clicked(){
     qDebug() << "[DEBUG]: Disconnected from host.";
 }
 
+//pull all messages
+void MainWindow::on_pushButton_6_clicked(){
+    message_list.clear();
+    displayed_text.clear();
+    ui->textBrowser->clear();
+
+    if(username.empty() || password.empty() || target_user.empty()){
+        qDebug() << "[DEBUG]: Error - all-pull without specified username, password or target.";
+        displayed_text.append("@ERROR: USERNAME, PASSWORD OR TARGET MISSING\n");
+        ui->textBrowser->setText(QString::fromStdString(displayed_text));
+    } else{
+        //send APLL to server
+        msg puller;
+        puller.form("2", "APLL", "3", username, password, target_user);
+        char write_buf[WRITE_BUF_SIZE];
+        strcpy(write_buf, puller.concat().c_str());
+        QString debug;
+        for(unsigned int i=0; i<puller.parts.size(); i++){
+            debug += QString::fromStdString(puller[i]);
+        }
+        qDebug() << "[DEBUG]: Sending all-pull request: " << debug;
+        tcpSocket->write(write_buf, sizeof(write_buf));
+        //READ
+    }
+}
+
 //read data on readyRead()
 void MainWindow::readData(){
     msg received;
-    char buf[BUF_SIZE];
-    int n = tcpSocket->readLine(buf, BUF_SIZE);
+    char buf[READ_BUF_SIZE];
+    int n = tcpSocket->readLine(buf, READ_BUF_SIZE);
     buf[n] = 0;
     std::string tmp_str(buf);
     received.decode(tmp_str);
@@ -154,6 +155,7 @@ void MainWindow::readData(){
         debug += QString::fromStdString(received[i]);
     }
     qDebug() << "[DEBUG]: Received: " << debug;
+    std::vector<std::string> tmp;
 
     for(unsigned int i=0; i<received.parts.size(); i++){
         if(received.extract(i).compare("RETN") == 0){
@@ -176,17 +178,24 @@ void MainWindow::readData(){
                 i += 3;
             }
             else if(received.extract(i+1).compare("3") == 0){
-                //simple displaying messages WITHOUT SORTING FOR NOW
-                //received[4] == TIMESTAMP
-                displayed_text.append("@");
-                displayed_text.append(received.extract(i+3));
-                displayed_text.append(": ");
-                displayed_text.append(received.extract(i+4));
-                displayed_text.append("\n");
-                ui->textBrowser->setText(QString::fromStdString(displayed_text));
-                qDebug() << "[DEBUG]: Message displayed";
+                tmp.clear();
+                tmp.push_back(received.extract(i+2));
+                tmp.push_back(received.extract(i+3));
+                tmp.push_back(received.extract(i+4));
+                message_list.push_back(tmp);
                 i += 4;
             }
+        } else if(received.extract(i).compare("ENDT") == 0){
+            std::sort(message_list.begin(), message_list.end(), timeSort);
+            for(auto m : message_list){
+                displayed_text.append("@");
+                displayed_text.append(m[1]);
+                displayed_text.append(": ");
+                displayed_text.append(m[2]);
+                displayed_text.append("\n");
+            }
+            ui->textBrowser->setText(QString::fromStdString(displayed_text));
+            qDebug() << "[DEBUG]: Messages displayed";
         }
     }
 }

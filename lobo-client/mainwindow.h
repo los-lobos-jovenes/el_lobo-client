@@ -6,6 +6,7 @@
 #include <QtNetwork>
 #include <string>
 #include <vector>
+#include <algorithm>
 //#include <QMutex>
 #include "msg.hpp"
 
@@ -24,7 +25,7 @@ public:
     std::string username = "";
     std::string password = "";
     std::string target_user = "";
-    //std::vector<msg> received;
+    std::vector<std::vector<std::string>> message_list; //timestamp//sender//text
     //QMutex mutex;
 
 private slots:
@@ -33,6 +34,7 @@ private slots:
      void on_pushButton_3_clicked();
      void on_pushButton_4_clicked();
      void on_pushButton_5_clicked();
+     void on_pushButton_6_clicked();
      void readData();
      void displayError(QAbstractSocket::SocketError socketError);
 

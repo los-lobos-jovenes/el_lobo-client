@@ -649,7 +649,7 @@
     <widget class="QPushButton" name="pushButton_4">
      <property name="geometry">
       <rect>
-       <x>240</x>
+       <x>170</x>
        <y>40</y>
        <width>151</width>
        <height>25</height>
@@ -672,13 +672,13 @@
       <string>User to which you want to type</string>
      </property>
     </widget>
-    <widget class="QCheckBox" name="checkBox_2">
+    <widget class="QPushButton" name="pushButton_6">
      <property name="geometry">
       <rect>
-       <x>420</x>
+       <x>330</x>
        <y>40</y>
-       <width>151</width>
-       <height>23</height>
+       <width>141</width>
+       <height>25</height>
       </rect>
      </property>
      <property name="text">
