@@ -31,7 +31,8 @@ Uwaga: stosować do debugowania i rozwijania klienta
 * Tworzenie i zmiana użytkownika (**CREA**).
 * Wchodzenie w konwersację z podanym użytkownikiem.
 * Wysyłanie wiadomości (**SEND**).
-* Pobieranie wszystkich wiadomości z serwera na żądanie (**APLL**) + ich sortowanie wg timestamp-u i wyświetlanie.
+* Zażądanie wszystkich wiadomości z serwera (**APLL**)
 * Cykliczne (co 2 sekundy) żądanie nowych wiadomości z serwera (**PULL**).
 * Oczekiwanie na wiadomości z serwera przez readyRead (**RETN**, **ENDT**).
+* Odbieranie wiadomości z serwera oraz ich sortowanie wg timestamp-u i wyświetlanie.
 * Informowanie użytkownika o większości błędów.
