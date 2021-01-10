@@ -47,7 +47,7 @@ void MainWindow::on_pushButton_clicked(){
         debug += QString::fromStdString(message[i]);
     }
     qDebug() << "[DEBUG]: Sending message: " << debug;
-    tcpSocket->write(write_buf, sizeof(write_buf));
+    tcpSocket->write(write_buf, message.concat().size() * sizeof(char));
 
 
     //immidiately display sent message
@@ -123,7 +123,7 @@ void MainWindow::on_pushButton_3_clicked(){
             debug += QString::fromStdString(user_creation[i]);
         }
         qDebug() << "[DEBUG]: Sending creation request: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
+        tcpSocket->write(write_buf, user_creation.concat().size() * sizeof(char));
 
         //READ
     }
@@ -185,7 +185,7 @@ void MainWindow::on_pushButton_6_clicked(){
             debug += QString::fromStdString(puller[i]);
         }
         qDebug() << "[DEBUG]: Sending all-pull request: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
+        tcpSocket->write(write_buf, puller.concat().size() * sizeof(char));
         //READ
     }
 }
@@ -275,7 +275,7 @@ void MainWindow::pullUnread(){
             debug += QString::fromStdString(puller[i]);
         }
         qDebug() << "[DEBUG]: Sending unread-pull request: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
+        tcpSocket->write(write_buf, puller.concat().size() * sizeof(char));
         //READ
 
         } else{
