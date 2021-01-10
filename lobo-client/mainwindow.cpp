@@ -48,12 +48,12 @@ void MainWindow::on_pushButton_clicked(){
         char write_buf[WRITE_BUF_SIZE];
         strcpy(write_buf, message.concat().c_str());
 
-        QString debug;
-        for(unsigned int i=0; i<message.parts.size(); i++){
-            debug += QString::fromStdString(message[i]);
-        }
-        qDebug() << "[DEBUG]: Sending message: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
+    QString debug;
+    for(unsigned int i=0; i<message.parts.size(); i++){
+        debug += QString::fromStdString(message[i]);
+    }
+    qDebug() << "[DEBUG]: Sending message: " << debug;
+    tcpSocket->write(write_buf, message.concat().size() * sizeof(char));
 
         //immidiately display sent message
         std::vector<std::string> tmp;
@@ -124,15 +124,14 @@ void MainWindow::on_pushButton_3_clicked(){
                 debug += QString::fromStdString(user_creation[i]);
             }
             qDebug() << "[DEBUG]: Sending creation request: " << debug;
-            tcpSocket->write(write_buf, sizeof(write_buf));
+        	tcpSocket->write(write_buf, user_creation.concat().size() * sizeof(char));
+			//READ
         } else{
              ui->textBrowser_2->append("@ERROR: CONNECTION OR USER OR PASSWORD MISSING");
              qDebug() << "[DEBUG]: Cannot create user";
-        }
-            //READ
+        }          
     } else{
         ui->textBrowser_2->append("@SUCCESS");
-        qDebug() << "[DEBUG]: Changed user to: " << QString::fromStdString(username);
     }
 }
 
@@ -184,7 +183,7 @@ void MainWindow::on_pushButton_6_clicked(){
             debug += QString::fromStdString(puller[i]);
         }
         qDebug() << "[DEBUG]: Sending all-pull request: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
+        tcpSocket->write(write_buf, puller.concat().size() * sizeof(char));
         //READ
     } else{
         qDebug() << "[DEBUG]: Error - all-pull without specified username, password or target.";
@@ -278,7 +277,7 @@ void MainWindow::pullUnread(){
             debug += QString::fromStdString(puller[i]);
         }
         qDebug() << "[DEBUG]: Sending unread-pull request: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
+        tcpSocket->write(write_buf, puller.concat().size() * sizeof(char));
         //READ
 
         } else{
@@ -301,7 +300,7 @@ void MainWindow::pendUnread(){
             debug += QString::fromStdString(pender[i]);
         }
         qDebug() << "[DEBUG]: Sending pend request: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
+        tcpSocket->write(write_buf, pender.concat().size() * sizeof(char));
         //READ
 
         } else{
