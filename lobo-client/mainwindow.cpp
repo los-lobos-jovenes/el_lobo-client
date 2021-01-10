@@ -14,8 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
     tcpSocket(new QTcpSocket(this))
 {
     connect(tcpSocket, &QIODevice::readyRead, this, &MainWindow::readData);
-    //typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
-    //connect(tcpSocket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error), this, &MainWindow::displayError);
+    typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
+    connect(tcpSocket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::errorOccurred), this, &MainWindow::displayError);
     ui->setupUi(this);
 }
 
@@ -57,10 +57,29 @@ void MainWindow::on_pushButton_clicked(){
 void MainWindow::on_pushButton_2_clicked(){
     QString address = ui->lineEdit->text();
     QString port = ui->lineEdit_5->text();
-    tcpSocket->connectToHost(address, port.toInt());
-    displayed_text.append("@SUCCESS: CONNECTED\n");
+    if(tcpSocket->state() == QTcpSocket::ConnectedState){
+        tcpSocket->disconnectFromHost();
+    }
+    tcpSocket->setProxy(QNetworkProxy::NoProxy); //podobno przyspiesza
+    tcpSocket->connectToHost(address, port.toInt(), QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
+
+    /*
+    QElapsedTimer connection_timer;
+    connection_timer.start();
+    while(tcpSocket->state() == QTcpSocket::ConnectingState && connection_timer.elapsed() < 2000){
+        qDebug() << connection_timer.elapsed();
+    }
+    */
+    tcpSocket->waitForConnected(3000);
+    qDebug() << "[DEBUG]: Connection state:" << tcpSocket->state();
+    if(tcpSocket->state() == QTcpSocket::ConnectedState){
+        displayed_text.append("@SUCCESS: CONNECTED\n");
+        qDebug() << "[DEBUG]: Connecting to host; IP:" << address << " ;port:" << port;
+    } else{
+        displayed_text.append("@ERROR: NOT CONNECTED\n");
+        qDebug() << "[DEBUG]: NOT connected to host; IP:" << address << " ;port:" << port;
+    }
     ui->textBrowser->setText(QString::fromStdString(displayed_text));
-    qDebug() << "[DEBUG]: Connected to host; IP: " << address << " ; port: " << port;
 }
 
 //change or create user
@@ -111,9 +130,17 @@ void MainWindow::on_pushButton_5_clicked(){
     ui->lineEdit->clear();
     ui->lineEdit_5->clear();
     tcpSocket->disconnectFromHost();
-    displayed_text.append("@SUCCESS: DISCONNECTED\n");
+
+    tcpSocket->waitForDisconnected(3000);
+    qDebug() << "[DEBUG]: Connection state:" << tcpSocket->state();
+    if(tcpSocket->state() == QTcpSocket::UnconnectedState || tcpSocket->state() == QTcpSocket::ClosingState){
+        displayed_text.append("@SUCCESS: DISCONNECTED\n");
+        qDebug() << "[DEBUG]: Disconnecting from host.";
+    } else{
+        displayed_text.append("@ERROR: NOT DISCONNECTED\n");
+        qDebug() << "[DEBUG]: NOT disconnected from host properly.";
+    }
     ui->textBrowser->setText(QString::fromStdString(displayed_text));
-    qDebug() << "[DEBUG]: Disconnected from host.";
 }
 
 //pull all messages
@@ -186,7 +213,10 @@ void MainWindow::readData(){
                 i += 4;
             }
         } else if(received.extract(i).compare("ENDT") == 0){
+            displayed_text.clear();
+            ui->textBrowser->clear();
             std::sort(message_list.begin(), message_list.end(), timeSort);
+            std::unique(message_list.begin(), message_list.end());
             for(auto m : message_list){
                 displayed_text.append("@");
                 displayed_text.append(m[1]);
@@ -202,5 +232,5 @@ void MainWindow::readData(){
 
 void MainWindow::displayError(QAbstractSocket::SocketError socketError){
 
-    qDebug() << socketError;
+    qDebug() << "[DEBUG]:" << socketError;
 }
