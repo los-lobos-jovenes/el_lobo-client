@@ -494,6 +494,12 @@
     <property name="cursor" stdset="0">
      <cursorShape>ArrowCursor</cursorShape>
     </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
+    </property>
+    <property name="sizeAdjustPolicy">
+     <enum>QAbstractScrollArea::AdjustToContents</enum>
+    </property>
    </widget>
    <widget class="QFrame" name="frame">
     <property name="geometry">
@@ -683,6 +689,22 @@
      </property>
      <property name="text">
       <string>Load all messages</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_2">
+     <property name="geometry">
+      <rect>
+       <x>480</x>
+       <y>40</y>
+       <width>141</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Unread refreshing</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>

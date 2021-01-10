@@ -16,6 +16,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(tcpSocket, &QIODevice::readyRead, this, &MainWindow::readData);
     typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
     connect(tcpSocket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::errorOccurred), this, &MainWindow::displayError);
+
+    //PULL every second
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &MainWindow::pullUnread);
+    timer->start(2000);
+
     ui->setupUi(this);
 }
 
@@ -43,13 +49,21 @@ void MainWindow::on_pushButton_clicked(){
     qDebug() << "[DEBUG]: Sending message: " << debug;
     tcpSocket->write(write_buf, sizeof(write_buf));
 
+    /*
     //immidiately display sent message
+    std::vector<std::string> tmp;
+    tmp.push_back(time);
+    tmp.push_back(username);
+    tmp.push_back(str);
+    message_list.push_back(tmp);
+
     displayed_text.append("@");
     displayed_text.append(username);
     displayed_text.append(": ");
     displayed_text.append(str);
     displayed_text.append("\n");
     ui->textBrowser->setText(QString::fromStdString(displayed_text));
+    */
     //READ
 }
 
@@ -213,6 +227,9 @@ void MainWindow::readData(){
                 i += 4;
             }
         } else if(received.extract(i).compare("ENDT") == 0){
+            QScrollBar *scrollBar = ui->textBrowser->verticalScrollBar();
+            int scroll_val = scrollBar->value();
+
             displayed_text.clear();
             ui->textBrowser->clear();
             std::sort(message_list.begin(), message_list.end(), timeSort);
@@ -225,7 +242,36 @@ void MainWindow::readData(){
                 displayed_text.append("\n");
             }
             ui->textBrowser->setText(QString::fromStdString(displayed_text));
+            //scroll to the previous place after displaying new messages
+            scrollBar->setValue(scroll_val);
             qDebug() << "[DEBUG]: Messages displayed";
+        }
+    }
+}
+
+void MainWindow::pullUnread(){
+    if(ui->checkBox_2->checkState()){
+        if(!username.empty() && !password.empty() && !target_user.empty() && tcpSocket->waitForConnected(900)){
+
+        //message_list.clear();
+        //displayed_text.clear();
+        //ui->textBrowser->clear();
+
+        //send PULL to server
+        msg puller;
+        puller.form("2", "PULL", "3", username, password, target_user);
+        char write_buf[WRITE_BUF_SIZE];
+        strcpy(write_buf, puller.concat().c_str());
+        QString debug;
+        for(unsigned int i=0; i<puller.parts.size(); i++){
+            debug += QString::fromStdString(puller[i]);
+        }
+        qDebug() << "[DEBUG]: Sending unread-pull request: " << debug;
+        tcpSocket->write(write_buf, sizeof(write_buf));
+        //READ
+
+        } else{
+        qDebug() << "[DEBUG]: Unread-pull ERROR.";
         }
     }
 }

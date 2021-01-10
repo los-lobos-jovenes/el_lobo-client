@@ -4,8 +4,10 @@
 #include <QMainWindow>
 #include <QtDebug>
 #include <QtNetwork>
+#include <QScrollBar>
 //#include <QMutex>
 //#include <QTime>
+#include <QTimer>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -38,6 +40,7 @@ private slots:
      void on_pushButton_5_clicked();
      void on_pushButton_6_clicked();
      void readData();
+     void pullUnread();
      void displayError(QAbstractSocket::SocketError socketError);
 
 private:
