@@ -74,7 +74,7 @@ void MainWindow::on_pushButton_2_clicked(){
     qDebug() << "[DEBUG]: Connection state:" << tcpSocket->state();
     if(tcpSocket->state() == QTcpSocket::ConnectedState){
         displayed_text.append("@SUCCESS: CONNECTED\n");
-        qDebug() << "[DEBUG]: Connecting to host; IP:" << address << " ;port:" << port;
+        qDebug() << "[DEBUG]: Connected to host; IP:" << address << " ;port:" << port;
     } else{
         displayed_text.append("@ERROR: NOT CONNECTED\n");
         qDebug() << "[DEBUG]: NOT connected to host; IP:" << address << " ;port:" << port;
@@ -133,9 +133,9 @@ void MainWindow::on_pushButton_5_clicked(){
 
     tcpSocket->waitForDisconnected(3000);
     qDebug() << "[DEBUG]: Connection state:" << tcpSocket->state();
-    if(tcpSocket->state() == QTcpSocket::UnconnectedState || tcpSocket->state() == QTcpSocket::ClosingState){
+    if(tcpSocket->state() == QTcpSocket::UnconnectedState){
         displayed_text.append("@SUCCESS: DISCONNECTED\n");
-        qDebug() << "[DEBUG]: Disconnecting from host.";
+        qDebug() << "[DEBUG]: Disconnected from host.";
     } else{
         displayed_text.append("@ERROR: NOT DISCONNECTED\n");
         qDebug() << "[DEBUG]: NOT disconnected from host properly.";
