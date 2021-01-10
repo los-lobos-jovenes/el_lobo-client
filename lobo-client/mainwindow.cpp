@@ -17,10 +17,15 @@ MainWindow::MainWindow(QWidget *parent)
     typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
     connect(tcpSocket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error), this, &MainWindow::displayError);
 
-    //PULL every second
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &MainWindow::pullUnread);
-    timer->start(2000);
+    //PULL every 2 seconds
+    QTimer *timer1 = new QTimer(this);
+    connect(timer1, &QTimer::timeout, this, &MainWindow::pullUnread);
+    timer1->start(2000);
+
+    //PEND every 3 seconds
+    QTimer *timer2 = new QTimer(this);
+    connect(timer2, &QTimer::timeout, this, &MainWindow::pendUnread);
+    timer2->start(3000);
 
     ui->setupUi(this);
 }
@@ -33,45 +38,48 @@ MainWindow::~MainWindow()
 //send message
 void MainWindow::on_pushButton_clicked(){
 
-    std::string str = ui->lineEdit_2->text().toStdString();
-    ui->lineEdit_2->clear();
+    if(!username.empty() && !password.empty() && !target_user.empty() && tcpSocket->waitForConnected(500)){
+        std::string str = ui->lineEdit_2->text().toStdString();
+        ui->lineEdit_2->clear();
 
-    //send SEND to server
-    msg message;
-    message.form("1", "SEND", "4", username, password, target_user, str);
-    char write_buf[WRITE_BUF_SIZE];
-    strcpy(write_buf, message.concat().c_str());
+        //send SEND to server
+        msg message;
+        message.form("1", "SEND", "4", username, password, target_user, str);
+        char write_buf[WRITE_BUF_SIZE];
+        strcpy(write_buf, message.concat().c_str());
 
-    QString debug;
-    for(unsigned int i=0; i<message.parts.size(); i++){
-        debug += QString::fromStdString(message[i]);
-    }
-    qDebug() << "[DEBUG]: Sending message: " << debug;
-    tcpSocket->write(write_buf, sizeof(write_buf));
+        QString debug;
+        for(unsigned int i=0; i<message.parts.size(); i++){
+            debug += QString::fromStdString(message[i]);
+        }
+        qDebug() << "[DEBUG]: Sending message: " << debug;
+        tcpSocket->write(write_buf, sizeof(write_buf));
 
+        //immidiately display sent message
+        std::vector<std::string> tmp;
+        std::string time;
+        if(message_list.size() > 0){
+            time = std::to_string(std::stoi(message_list.back()[0])+1);
+        } else{
+            time = "1";
+        }
+        tmp.push_back(time);
+        tmp.push_back(username);
+        tmp.push_back(str);
+        message_list.push_back(tmp);
 
-    //immidiately display sent message
-    std::vector<std::string> tmp;
-    std::string time;
-    if(message_list.size() > 0){
-        time = std::to_string(std::stoi(message_list.back()[0])+1);
+        displayed_text.append("@");
+        displayed_text.append(username);
+        displayed_text.append(": ");
+        displayed_text.append(str);
+        displayed_text.append("\n");
+        ui->textBrowser->setText(QString::fromStdString(displayed_text));
+
+        tmp.clear();
+        //READ
     } else{
-        time = "1";
+        ui->textBrowser_2->append("@ERROR: CONNECTION OR USERS OR PASSWORD MISSING");
     }
-    tmp.push_back(time);
-    tmp.push_back(username);
-    tmp.push_back(str);
-    message_list.push_back(tmp);
-
-    displayed_text.append("@");
-    displayed_text.append(username);
-    displayed_text.append(": ");
-    displayed_text.append(str);
-    displayed_text.append("\n");
-    ui->textBrowser->setText(QString::fromStdString(displayed_text));
-
-    tmp.clear();
-    //READ
 }
 
 //connect to host
@@ -84,23 +92,15 @@ void MainWindow::on_pushButton_2_clicked(){
     tcpSocket->setProxy(QNetworkProxy::NoProxy); //podobno przyspiesza
     tcpSocket->connectToHost(address, port.toInt(), QIODevice::ReadWrite, QAbstractSocket::IPv4Protocol);
 
-    /*
-    QElapsedTimer connection_timer;
-    connection_timer.start();
-    while(tcpSocket->state() == QTcpSocket::ConnectingState && connection_timer.elapsed() < 2000){
-        qDebug() << connection_timer.elapsed();
-    }
-    */
     tcpSocket->waitForConnected(3000);
     qDebug() << "[DEBUG]: Connection state:" << tcpSocket->state();
     if(tcpSocket->state() == QTcpSocket::ConnectedState){
-        displayed_text.append("@SUCCESS: CONNECTED\n");
+        ui->textBrowser_2->append("@SUCCESS: CONNECTED");
         qDebug() << "[DEBUG]: Connected to host; IP:" << address << " ;port:" << port;
     } else{
-        displayed_text.append("@ERROR: NOT CONNECTED\n");
+        ui->textBrowser_2->append("@ERROR: NOT CONNECTED");
         qDebug() << "[DEBUG]: NOT connected to host; IP:" << address << " ;port:" << port;
     }
-    ui->textBrowser->setText(QString::fromStdString(displayed_text));
 }
 
 //change or create user
@@ -112,24 +112,26 @@ void MainWindow::on_pushButton_3_clicked(){
     password = ui->lineEdit_6->text().toStdString();
 
     if(ui->checkBox->checkState()){
-        //send CREA to server
-        msg user_creation;
-        user_creation.form("1", "CREA", "2", username, password);
-        char write_buf[WRITE_BUF_SIZE];
-        strcpy(write_buf, user_creation.concat().c_str());
+        if(!username.empty() && !password.empty() && tcpSocket->waitForConnected(500)){
+            //send CREA to server
+            msg user_creation;
+            user_creation.form("1", "CREA", "2", username, password);
+            char write_buf[WRITE_BUF_SIZE];
+            strcpy(write_buf, user_creation.concat().c_str());
 
-        QString debug;
-        for(unsigned int i=0; i<user_creation.parts.size(); i++){
-            debug += QString::fromStdString(user_creation[i]);
+            QString debug;
+            for(unsigned int i=0; i<user_creation.parts.size(); i++){
+                debug += QString::fromStdString(user_creation[i]);
+            }
+            qDebug() << "[DEBUG]: Sending creation request: " << debug;
+            tcpSocket->write(write_buf, sizeof(write_buf));
+        } else{
+             ui->textBrowser_2->append("@ERROR: CONNECTION OR USER OR PASSWORD MISSING");
+             qDebug() << "[DEBUG]: Cannot create user";
         }
-        qDebug() << "[DEBUG]: Sending creation request: " << debug;
-        tcpSocket->write(write_buf, sizeof(write_buf));
-
-        //READ
-    }
-    else{
-        //displayed_text.append("@SUCCESS\n");
-        //ui->textBrowser->setText(QString::fromStdString(displayed_text));
+            //READ
+    } else{
+        ui->textBrowser_2->append("@SUCCESS");
         qDebug() << "[DEBUG]: Changed user to: " << QString::fromStdString(username);
     }
 }
@@ -140,7 +142,9 @@ void MainWindow::on_pushButton_4_clicked(){
     displayed_text.clear();
     ui->textBrowser->clear();
     target_user = ui->lineEdit_4->text().toStdString();
+    ui->textBrowser_2->append("@SUCCESS: CHAT WITH: " + QString::fromStdString(target_user));
     qDebug() << "[DEBUG]: Conversation changed to: " << QString::fromStdString(target_user);
+    MainWindow::on_pushButton_6_clicked();
 }
 
 //disconnect from host
@@ -155,13 +159,12 @@ void MainWindow::on_pushButton_5_clicked(){
     tcpSocket->waitForDisconnected(3000);
     qDebug() << "[DEBUG]: Connection state:" << tcpSocket->state();
     if(tcpSocket->state() == QTcpSocket::UnconnectedState){
-        displayed_text.append("@SUCCESS: DISCONNECTED\n");
+        ui->textBrowser_2->append("@SUCCESS: DISCONNECTED");
         qDebug() << "[DEBUG]: Disconnected from host.";
     } else{
-        displayed_text.append("@ERROR: NOT DISCONNECTED\n");
+        ui->textBrowser_2->append("@ERROR: NOT DISCONNECTED");
         qDebug() << "[DEBUG]: NOT disconnected from host properly.";
     }
-    ui->textBrowser->setText(QString::fromStdString(displayed_text));
 }
 
 //pull all messages
@@ -170,11 +173,7 @@ void MainWindow::on_pushButton_6_clicked(){
     displayed_text.clear();
     ui->textBrowser->clear();
 
-    if(username.empty() || password.empty() || target_user.empty()){
-        qDebug() << "[DEBUG]: Error - all-pull without specified username, password or target.";
-        displayed_text.append("@ERROR: USERNAME, PASSWORD OR TARGET MISSING\n");
-        ui->textBrowser->setText(QString::fromStdString(displayed_text));
-    } else{
+    if(!username.empty() && !password.empty() && !target_user.empty() && tcpSocket->waitForConnected(500)){
         //send APLL to server
         msg puller;
         puller.form("2", "APLL", "3", username, password, target_user);
@@ -187,6 +186,9 @@ void MainWindow::on_pushButton_6_clicked(){
         qDebug() << "[DEBUG]: Sending all-pull request: " << debug;
         tcpSocket->write(write_buf, sizeof(write_buf));
         //READ
+    } else{
+        qDebug() << "[DEBUG]: Error - all-pull without specified username, password or target.";
+        ui->textBrowser_2->append("@ERROR: CONNECTION OR USERS OR PASSWORD MISSING");
     }
 }
 
@@ -204,24 +206,25 @@ void MainWindow::readData(){
     }
     qDebug() << "[DEBUG]: Received: " << debug;
     std::vector<std::string> tmp;
+    tmp.clear();
 
     for(unsigned int i=0; i<received.parts.size(); i++){
         if(received.extract(i).compare("RETN") == 0){
-            /* succes action
-            if(received.extract(i+1).compare("1") == 0 && received.extract(i+2).compare("SUCCESS") == 0){
-                displayed_text.append("@SUCCESS\n");
-                ui->textBrowser->setText(QString::fromStdString(displayed_text));
-                qDebug() << "[DEBUG]: Success displayed";
-                i += 3;
-            } else
-            */
-            if(received.extract(i+1).compare("2") == 0){
-                displayed_text.append("@");
-                displayed_text.append(received.extract(i+2));
-                displayed_text.append(": ");
-                displayed_text.append(received.extract(i+3));
-                displayed_text.append("\n");
-                ui->textBrowser->setText(QString::fromStdString(displayed_text));
+            if(received.extract(i+1).compare("1") == 0){
+                //regular success message
+                if(received.extract(i+2).compare("SUCCESS") == 0){
+                    ui->textBrowser_2->append("@SUCCESS");
+                    qDebug() << "[DEBUG]: Success displayed";
+                }
+                //PEND answer
+                else{
+                    ui->textBrowser_2->append("@PENDING:" + QString::fromStdString(received.extract(i+2)));
+                    qDebug() << "[DEBUG]: Pending displayed";
+                }
+
+                i += 2;
+            } else if(received.extract(i+1).compare("2") == 0){
+                ui->textBrowser_2->append("@" + QString::fromStdString(received.extract(i+2)) + ": " + QString::fromStdString(received.extract(i+3)));
                 qDebug() << "[DEBUG]: Error displayed";
                 i += 3;
             }
@@ -233,7 +236,7 @@ void MainWindow::readData(){
                 message_list.push_back(tmp);
                 i += 4;
             }
-        } else if(received.extract(i).compare("ENDT") == 0){
+        } else if(received.extract(i).compare("ENDT") == 0 && !tmp.empty()){
             QScrollBar *scrollBar = ui->textBrowser->verticalScrollBar();
             int scroll_val = scrollBar->value();
 
@@ -259,7 +262,7 @@ void MainWindow::readData(){
 
 void MainWindow::pullUnread(){
     if(ui->checkBox_2->checkState()){
-        if(!username.empty() && !password.empty() && !target_user.empty() && tcpSocket->waitForConnected(900)){
+        if(!username.empty() && !password.empty() && !target_user.empty() && tcpSocket->waitForConnected(500)){
 
         //message_list.clear();
         //displayed_text.clear();
@@ -280,6 +283,29 @@ void MainWindow::pullUnread(){
 
         } else{
         qDebug() << "[DEBUG]: Unread-pull ERROR.";
+        }
+    }
+}
+
+void MainWindow::pendUnread(){
+    if(ui->checkBox_3->checkState()){
+        if(!username.empty() && !password.empty() && tcpSocket->waitForConnected(500)){
+
+        //send PEND to server
+        msg pender;
+        pender.form("2", "PEND", "2", username, password);
+        char write_buf[WRITE_BUF_SIZE];
+        strcpy(write_buf, pender.concat().c_str());
+        QString debug;
+        for(unsigned int i=0; i<pender.parts.size(); i++){
+            debug += QString::fromStdString(pender[i]);
+        }
+        qDebug() << "[DEBUG]: Sending pend request: " << debug;
+        tcpSocket->write(write_buf, sizeof(write_buf));
+        //READ
+
+        } else{
+        qDebug() << "[DEBUG]: Pend ERROR.";
         }
     }
 }

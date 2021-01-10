@@ -33,5 +33,6 @@ Uwaga: stosować do debugowania i rozwijania klienta
 * Wysyłanie wiadomości (**SEND**).
 * Pobieranie wszystkich wiadomości z serwera na żądanie (**APLL**) + ich sortowanie wg timestamp-u i wyświetlanie.
 * Cykliczne (co 2 sekundy) żądanie nowych wiadomości z serwera (**PULL**).
+* Cykliczne (co 3 sekundy) żądanie powiadomień o nowych wiadomościach (**PEND**).
 * Oczekiwanie na wiadomości z serwera przez readyRead (**RETN**, **ENDT**).
 * Informowanie użytkownika o większości błędów.

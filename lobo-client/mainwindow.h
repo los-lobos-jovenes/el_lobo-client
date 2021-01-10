@@ -5,6 +5,7 @@
 #include <QtDebug>
 #include <QtNetwork>
 #include <QScrollBar>
+#include <QTextEdit>
 //#include <QMutex>
 //#include <QTime>
 #include <QTimer>
@@ -41,6 +42,7 @@ private slots:
      void on_pushButton_6_clicked();
      void readData();
      void pullUnread();
+     void pendUnread();
      void displayError(QAbstractSocket::SocketError socketError);
 
 private:

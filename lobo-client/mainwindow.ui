@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>655</width>
-    <height>600</height>
+    <height>608</height>
    </rect>
   </property>
   <property name="palette">
@@ -459,7 +459,7 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>100</x>
       <y>550</y>
       <width>83</width>
       <height>25</height>
@@ -473,7 +473,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>520</y>
+      <y>510</y>
       <width>621</width>
       <height>25</height>
      </rect>
@@ -500,74 +500,6 @@
     <property name="sizeAdjustPolicy">
      <enum>QAbstractScrollArea::AdjustToContents</enum>
     </property>
-   </widget>
-   <widget class="QFrame" name="frame">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>9</y>
-      <width>261</width>
-      <height>71</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>40</y>
-       <width>121</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Connect</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_5">
-     <property name="geometry">
-      <rect>
-       <x>142</x>
-       <y>40</y>
-       <width>111</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Disconnect</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_5">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>10</y>
-       <width>71</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="placeholderText">
-      <string>Port</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>161</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="placeholderText">
-      <string>IP address</string>
-     </property>
-    </widget>
    </widget>
    <widget class="QFrame" name="frame_2">
     <property name="geometry">
@@ -640,9 +572,9 @@
    <widget class="QFrame" name="frame_3">
     <property name="geometry">
      <rect>
-      <x>9</x>
-      <y>89</y>
-      <width>631</width>
+      <x>10</x>
+      <y>90</y>
+      <width>261</width>
       <height>71</height>
      </rect>
     </property>
@@ -655,14 +587,14 @@
     <widget class="QPushButton" name="pushButton_4">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>70</x>
        <y>40</y>
-       <width>151</width>
+       <width>121</width>
        <height>25</height>
       </rect>
      </property>
      <property name="text">
-      <string>Change conversation</string>
+      <string>Change chat</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEdit_4">
@@ -670,7 +602,7 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>611</width>
+       <width>241</width>
        <height>25</height>
       </rect>
      </property>
@@ -678,42 +610,152 @@
       <string>User to which you want to type</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_6">
+   </widget>
+   <widget class="QPushButton" name="pushButton_6">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>550</y>
+      <width>141</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load all messages</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_2">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>540</y>
+      <width>141</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Unread refreshing</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>261</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLineEdit" name="lineEdit">
      <property name="geometry">
       <rect>
-       <x>330</x>
+       <x>10</x>
+       <y>10</y>
+       <width>161</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="placeholderText">
+      <string>IP address</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_5">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>10</y>
+       <width>71</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="placeholderText">
+      <string>Port</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
        <y>40</y>
-       <width>141</width>
+       <width>111</width>
        <height>25</height>
       </rect>
      </property>
      <property name="text">
-      <string>Clear and reload all</string>
+      <string>Connect</string>
      </property>
     </widget>
-    <widget class="QCheckBox" name="checkBox_2">
+    <widget class="QPushButton" name="pushButton_5">
      <property name="geometry">
       <rect>
-       <x>480</x>
+       <x>140</x>
        <y>40</y>
-       <width>141</width>
-       <height>23</height>
+       <width>111</width>
+       <height>25</height>
       </rect>
      </property>
      <property name="text">
-      <string>Unread refreshing</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
+      <string>Disconnect</string>
      </property>
     </widget>
    </widget>
+   <widget class="QTextBrowser" name="textBrowser_2">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>90</y>
+      <width>361</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>DejaVu Sans Mono</family>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="cursor" stdset="0">
+     <cursorShape>ArrowCursor</cursorShape>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
+    </property>
+    <property name="sizeAdjustPolicy">
+     <enum>QAbstractScrollArea::AdjustToContents</enum>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_3">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>560</y>
+      <width>101</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Unread info</string>
+    </property>
+   </widget>
+   <zorder>textBrowser_2</zorder>
+   <zorder>frame</zorder>
    <zorder>frame_3</zorder>
    <zorder>frame_2</zorder>
-   <zorder>frame</zorder>
    <zorder>pushButton</zorder>
    <zorder>lineEdit_2</zorder>
    <zorder>textBrowser</zorder>
+   <zorder>pushButton_6</zorder>
+   <zorder>checkBox_2</zorder>
+   <zorder>checkBox_3</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
