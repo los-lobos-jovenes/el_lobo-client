@@ -111,27 +111,27 @@ void MainWindow::on_pushButton_3_clicked(){
     username = ui->lineEdit_3->text().toStdString();
     password = ui->lineEdit_6->text().toStdString();
 
-    if(ui->checkBox->checkState()){
-        if(!username.empty() && !password.empty() && tcpSocket->waitForConnected(500)){
-            //send CREA to server
-            msg user_creation;
-            user_creation.form("1", "CREA", "2", username, password);
-            char write_buf[WRITE_BUF_SIZE];
-            strcpy(write_buf, user_creation.concat().c_str());
+    if(!username.empty() && !password.empty() && tcpSocket->waitForConnected(500)){
+        if(ui->checkBox->checkState()){
+        //send CREA to server
+        msg user_creation;
+        user_creation.form("1", "CREA", "2", username, password);
+        char write_buf[WRITE_BUF_SIZE];
+        strcpy(write_buf, user_creation.concat().c_str());
 
-            QString debug;
-            for(unsigned int i=0; i<user_creation.parts.size(); i++){
-                debug += QString::fromStdString(user_creation[i]);
-            }
-            qDebug() << "[DEBUG]: Sending creation request: " << debug;
-        	tcpSocket->write(write_buf, user_creation.concat().size() * sizeof(char));
-			//READ
+        QString debug;
+        for(unsigned int i=0; i<user_creation.parts.size(); i++){
+            debug += QString::fromStdString(user_creation[i]);
+        }
+        qDebug() << "[DEBUG]: Sending creation request: " << debug;
+        tcpSocket->write(write_buf, user_creation.concat().size() * sizeof(char));
+        //READ
         } else{
-             ui->textBrowser_2->append("@ERROR: CONNECTION OR USER OR PASSWORD MISSING");
-             qDebug() << "[DEBUG]: Cannot create user";
+             ui->textBrowser_2->append("@SUCCESS");
         }          
     } else{
-        ui->textBrowser_2->append("@SUCCESS");
+        ui->textBrowser_2->append("@ERROR: CONNECTION OR USER OR PASSWORD MISSING");
+        qDebug() << "[DEBUG]: Cannot change or create user";
     }
 }
 
@@ -141,9 +141,15 @@ void MainWindow::on_pushButton_4_clicked(){
     displayed_text.clear();
     ui->textBrowser->clear();
     target_user = ui->lineEdit_4->text().toStdString();
-    ui->textBrowser_2->append("@SUCCESS: CHAT WITH: " + QString::fromStdString(target_user));
-    qDebug() << "[DEBUG]: Conversation changed to: " << QString::fromStdString(target_user);
-    MainWindow::on_pushButton_6_clicked();
+    if(!username.empty() && !password.empty() && tcpSocket->waitForConnected(500) && target_user.compare(username) != 0){
+        ui->textBrowser_2->append("@SUCCESS: CHAT WITH: " + QString::fromStdString(target_user));
+        qDebug() << "[DEBUG]: Conversation changed to: " << QString::fromStdString(target_user);
+        MainWindow::on_pushButton_6_clicked(); //APLL
+        //MainWindow::pullUnread(); //PULL
+    } else{
+        ui->textBrowser_2->append("@ERROR: CONNECTION OR USERS WRONG");
+        qDebug() << "[DEBUG]: Cannot change conversation";
+    }
 }
 
 //disconnect from host
@@ -175,7 +181,8 @@ void MainWindow::on_pushButton_6_clicked(){
     if(!username.empty() && !password.empty() && !target_user.empty() && tcpSocket->waitForConnected(500)){
         //send APLL to server
         msg puller;
-        puller.form("2", "APLL", "3", username, password, target_user);
+        //puller.form("2", "APLL", "3", username, password, target_user);
+        puller.form("2", "APLL", "4", username, password, target_user, "read");
         char write_buf[WRITE_BUF_SIZE];
         strcpy(write_buf, puller.concat().c_str());
         QString debug;
@@ -254,6 +261,7 @@ void MainWindow::readData(){
             //scroll to the previous place after displaying new messages
             scrollBar->setValue(scroll_val);
             qDebug() << "[DEBUG]: Messages displayed";
+            i += 1;
         }
     }
     tmp.clear();
@@ -292,7 +300,7 @@ void MainWindow::pendUnread(){
 
         //send PEND to server
         msg pender;
-        pender.form("2", "PEND", "2", username, password);
+        pender.form("1", "PEND", "2", username, password);
         char write_buf[WRITE_BUF_SIZE];
         strcpy(write_buf, pender.concat().c_str());
         QString debug;
