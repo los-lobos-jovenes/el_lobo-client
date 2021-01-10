@@ -6,7 +6,9 @@ Oparty na Qt5
 
 ## Prosta kompilacja i uruchomienie
 
-Qt Creator
+**Qt Creator**
+
+Uwaga: stosować do debugowania i rozwijania klienta
 
 ## Zaawansowana kompilacja i uruchomienie (terminal)
 
@@ -18,6 +20,7 @@ Qt Creator
 
 ### Kompilacja
 > cd lobo-client
+
 > qmake-qt5 lobo-client.pro && make
 
 ### Uruchomienie
