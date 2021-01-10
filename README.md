@@ -4,13 +4,13 @@ Klient czatu el-lobo
 
 Oparty na Qt5
 
-## Prosta kompilacja i uruchomienie
+## Deweloperska kompilacja i uruchomienie
 
 **Qt Creator**
 
 Uwaga: stosować do debugowania i rozwijania klienta
 
-## Zaawansowana kompilacja i uruchomienie (terminal)
+## Produkcyjna kompilacja i uruchomienie (terminal)
 
 ### Instalacja Qt5 (Ubuntu)
 > sudo apt-get install qt5-default
