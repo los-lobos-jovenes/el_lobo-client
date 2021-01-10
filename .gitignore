@@ -1,0 +1,7 @@
+.qmake.stash
+moc_*.h
+moc_*.cpp
+ui_*.h
+*.o
+Makefile
+lobo-client/lobo-client
