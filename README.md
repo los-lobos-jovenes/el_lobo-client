@@ -2,15 +2,26 @@
 
 Klient czatu el-lobo
 
-[insert-logo-here]
+Oparty na Qt5
 
-## Kompilacja
+## Prosta kompilacja i uruchomienie
 
-> Qt Creator
+Qt Creator
 
-## Uruchomienie
+## Zaawansowana kompilacja i uruchomienie (terminal)
 
-> Qt Creator
+### Instalacja Qt5 (Ubuntu)
+> sudo apt-get install qt5-default
+
+### Instalacja Qt5 (Fedora)
+> sudo dnf install qt5-devel
+
+### Kompilacja
+> cd lobo-client
+> qmake-qt5 lobo-client.pro && make
+
+### Uruchomienie
+> ./lobo-client
 
 ## Zaimplementowane funkcje:
 * Łączenie i rozłączanie z serwerem.

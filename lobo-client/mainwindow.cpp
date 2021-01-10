@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     connect(tcpSocket, &QIODevice::readyRead, this, &MainWindow::readData);
     typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
-    connect(tcpSocket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::errorOccurred), this, &MainWindow::displayError);
+    connect(tcpSocket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error), this, &MainWindow::displayError);
 
     //PULL every second
     QTimer *timer = new QTimer(this);
@@ -49,9 +49,15 @@ void MainWindow::on_pushButton_clicked(){
     qDebug() << "[DEBUG]: Sending message: " << debug;
     tcpSocket->write(write_buf, sizeof(write_buf));
 
-    /*
+
     //immidiately display sent message
     std::vector<std::string> tmp;
+    std::string time;
+    if(message_list.size() > 0){
+        time = std::to_string(std::stoi(message_list.back()[0])+1);
+    } else{
+        time = "1";
+    }
     tmp.push_back(time);
     tmp.push_back(username);
     tmp.push_back(str);
@@ -63,7 +69,8 @@ void MainWindow::on_pushButton_clicked(){
     displayed_text.append(str);
     displayed_text.append("\n");
     ui->textBrowser->setText(QString::fromStdString(displayed_text));
-    */
+
+    tmp.clear();
     //READ
 }
 
@@ -247,6 +254,7 @@ void MainWindow::readData(){
             qDebug() << "[DEBUG]: Messages displayed";
         }
     }
+    tmp.clear();
 }
 
 void MainWindow::pullUnread(){

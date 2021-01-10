@@ -688,7 +688,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Load all messages</string>
+      <string>Clear and reload all</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_2">
