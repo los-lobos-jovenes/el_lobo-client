@@ -6,8 +6,6 @@
 #include <QtNetwork>
 #include <QScrollBar>
 #include <QTextEdit>
-//#include <QMutex>
-//#include <QTime>
 #include <QTimer>
 #include <string>
 #include <vector>
